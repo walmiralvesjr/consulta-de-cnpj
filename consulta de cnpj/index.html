@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <img src="img/1.png" alt="frangolandia">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de CNPJ</title>
+    <style>
+        
+        /* Estilo do fundo */
+        body {
+            background-color: #1e1e1e;
+            font-family: 'Arial Black', sans-serif;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            
+        }
+
+        img {
+            max-width: 50%;
+            max-height: 10%;
+           top: 14%;
+           left: 45%;
+           position: absolute;
+        }
+
+        /* Container principal */
+        .container {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            width: 400px;
+        }
+
+        /* Título */
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        /* Estilo do formulário */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Estilo dos rótulos */
+        label {
+            font-size: 1.2em;
+            color: #fff;
+        }
+
+        /* Estilo dos inputs */
+        input {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        /* Inputs desabilitados */
+        input:disabled {
+            background-color: #555;
+            color: #ddd;
+        }
+
+        /* Estilo do botão */
+        button {
+            padding: 10px;
+            background-color: #291fb9;
+            color: white;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0a1a64;
+        }
+
+        /* Mensagens de erro */
+        .error {
+            color: red;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1></h1>
+        <form id="cnpj-form">
+            <label for="cnpj">Digite o CNPJ:</label>
+            <input type="text" id="cnpj" placeholder="00.000.000/0000-00" required>
+            <button type="button" onclick="consultarCNPJ()">Consultar</button>
+        </form>
+
+        <!-- Formulário para exibir os dados do CNPJ -->
+        <form id="resultado-form">
+            <label for="razaoSocial">Razão Social:</label>
+            <input type="text" id="razaoSocial" disabled>
+
+            <label for="cnpjResult">CNPJ:</label>
+            <input type="text" id="cnpjResult" disabled>
+
+            <label for="endereco">Endereço:</label>
+            <input type="text" id="endereco" disabled>
+        </form>
+
+        <div class="error" id="error"></div>
+    </div>
+
+    <script>
+        async function consultarCNPJ() {
+            const cnpj = document.getElementById('cnpj').value.replace(/[^0-9]/g, ''); // Limpar pontos e traços
+            const url = `https://publica.cnpj.ws/cnpj/${cnpj}`;
+            const errorDiv = document.getElementById('error');
+            errorDiv.innerHTML = ''; // Limpar mensagens de erro
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Erro ao consultar CNPJ');
+                }
+                const data = await response.json();
+
+                // Preencher os campos do formulário com os dados retornados
+                document.getElementById('razaoSocial').value = data.razao_social;
+                document.getElementById('cnpjResult').value = data.estabelecimento.cnpj;
+                document.getElementById('endereco').value = `${data.estabelecimento.tipo_logradouro} ${data.estabelecimento.logradouro}, ${data.estabelecimento.numero} - ${data.estabelecimento.bairro}, ${data.estabelecimento.cidade.nome} - ${data.estabelecimento.estado.sigla}`;
+            } catch (error) {
+                errorDiv.innerHTML = 'Erro ao buscar dados. Verifique o CNPJ e tente novamente.';
+            }
+        }
+    </script>
+</body>
+</html>
